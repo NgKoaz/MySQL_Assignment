@@ -7,9 +7,8 @@ CREATE TABLE IF NOT EXISTS clinic
 (
 	id					INT 				AUTO_INCREMENT,
     _name				VARCHAR(50)			UNIQUE,
-    worktime 			VARCHAR(100)		NOT NULL,
-    email    			VARCHAR(50)			NOT NULL,
-    _desc				VARCHAR(100),
+    email    			VARCHAR(100)		NOT NULL,
+    _desc				VARCHAR(255),
     PRIMARY KEY (id)
 );
 
@@ -56,18 +55,20 @@ CREATE TABLE IF NOT EXISTS appointment
 CREATE TABLE IF NOT EXISTS _user
 (
 	id 					INT					AUTO_INCREMENT,
-    fullname			TIME				NOT NULL,
-    gender				BOOL				NOT NULL,
+    fname				VARCHAR(20)			NOT NULL,
+    minit				VARCHAR(20),
+    lname 				VARCHAR(20)			NOT NULL,
+    gender				VARCHAR(10)			NOT NULL,
 	birthdate			DATE				NOT NULL,
-    addr				VARCHAR(50),
-    email 				VARCHAR(50),
-    phone				VARCHAR(15)			NOT NULL,
-    is_active			BOOL				NOT NULL DEFAULT TRUE,
-    username			VARCHAR(50)			UNIQUE,
-    _password			VARCHAR(50)			NOT NULL,
+    addr				VARCHAR(255),
+    email 				VARCHAR(50)			NOT NULL 	UNIQUE,
+    phone_num			VARCHAR(15)			NOT NULL,
+    is_active			BOOL				NOT NULL 	DEFAULT TRUE,
+    username			VARCHAR(50)			NOT NULL 	UNIQUE,
+    _password			VARCHAR(255) 		NOT NULL,
     
     CONSTRAINT user_check_1
-		CHECK (gender = "NAM" OR gender = "NỮ"),
+		CHECK (gender = "NAM" OR gender = "NỮ" OR gender="KHÁC"),
     
     PRIMARY KEY (id)
 );
@@ -75,7 +76,6 @@ CREATE TABLE IF NOT EXISTS _user
 CREATE TABLE IF NOT EXISTS patient
 (
 	id 					INT 				PRIMARY KEY,
-    
     CONSTRAINT fk_patient_id FOREIGN KEY (id)
 		REFERENCES _user(id) 
 		ON DELETE CASCADE
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS patient
 CREATE TABLE IF NOT EXISTS medical_staff
 (
 	id 					INT 				PRIMARY KEY,
-    start_date 			DATE				DEFAULT CURRENT_TIMESTAMP,
+    start_date 			DATE				DEFAULT NOW(),
     YOE 				INT					NOT NULL,
     license_number 		VARCHAR(50)			NOT NULL,
     salary 				INT					NOT NULL,
@@ -121,15 +121,18 @@ CREATE TABLE IF NOT EXISTS  nurse
 
 CREATE TABLE IF NOT EXISTS examination
 (
-	id 					INT 				PRIMARY KEY,
+	id 					INT 				AUTO_INCREMENT,
     diagnose 			VARCHAR(100)		NOT NULL,
     _desc 				VARCHAR(50),
     image 				VARCHAR(100),
+    total_price			INT					NOT NULL DEFAULT 0,
     doctor_id			INT,
     patient_id 			INT,
     app_id 				INT,
     bill_id				INT,
     service_id			INT,
+    
+    PRIMARY KEY (id),
     
 	CONSTRAINT fk_examination_doctoc_id 	FOREIGN KEY (doctor_id)
 		REFERENCES doctor(id) 					
@@ -150,7 +153,8 @@ CREATE TABLE IF NOT EXISTS examination
 
 CREATE TABLE IF NOT EXISTS bill
 (
-	id 					INT					AUTO_INCREMENT,		
+	id 					INT					AUTO_INCREMENT,
+    total_cost			INT					NOT NULL DEFAULT 0,
     _status 			BOOL				NOT NULL DEFAULT FALSE, /* 0: Not pay yet, 1: Paid */
     _timestamp 			TIMESTAMP 			NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -209,7 +213,7 @@ CREATE TABLE IF NOT EXISTS work_with
         ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS app_of_patient
+CREATE TABLE IF NOT EXISTS patient_appointment
 (
 	patient_id 			INT,
     app_id 				INT,
@@ -220,11 +224,11 @@ CREATE TABLE IF NOT EXISTS app_of_patient
     CONSTRAINT app_of_patient_check_1
 		CHECK (_status ="CHƯA XÁC NHẬN" OR _status ="ĐÃ XÁC NHẬN" OR _status="KẾT THÚC"),
     
-    CONSTRAINT fk_app_of_patient_patient_id 	FOREIGN KEY (patient_id)
+    CONSTRAINT fk_patient_appointment_patient_id 	FOREIGN KEY (patient_id)
 		REFERENCES patient(id) 						
         ON DELETE CASCADE,
     
-    CONSTRAINT fk_app_of_patient_app_id 		FOREIGN KEY (app_id)
+    CONSTRAINT fk_patient_appointment_app_id 		FOREIGN KEY (app_id)
 		REFERENCES appointment(id) 					
         ON DELETE CASCADE
 );
@@ -260,7 +264,7 @@ CREATE TABLE IF NOT EXISTS prescription
     
 	PRIMARY KEY (exam_id, serial_num),
     
-    CONSTRAINT medicine_in_clinic_check_1
+    CONSTRAINT prescription_check_1
 		CHECK (quantity >= 0),
     
     CONSTRAINT fk_prescription_exam_id			FOREIGN KEY (exam_id)
@@ -269,7 +273,7 @@ CREATE TABLE IF NOT EXISTS prescription
     
     CONSTRAINT fk_prescription_serial_num 		FOREIGN KEY (serial_num)
 		REFERENCES medicine(serial_num)				
-        ON DELETE SET NULL,
+        ON DELETE CASCADE,
     
     CHECK (quantity > 0)
 );
@@ -285,14 +289,30 @@ CREATE TABLE IF NOT EXISTS clinic_hotline(
         ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS patient_allergy(
-	patient_id 			INT,
+CREATE TABLE IF NOT EXISTS clinic_worktime
+(
+	clinic_id 			INT,
+    weekdays			VARCHAR(15),
+    open_time			TIME,
+    close_time			TIME,
+    
+    PRIMARY KEY (clinic_id, weekdays, open_time, close_time),
+    
+    CONSTRAINT clinic_worktime_check_1 CHECK (open_time < close_time),
+    
+    CONSTRAINT fk_clinic_worktime_clinic_id 		FOREIGN KEY (clinic_id)
+		REFERENCES clinic(id) 					
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS examination_allergy(
+	exam_id 			INT,
     allergy				INT,
     
-    PRIMARY KEY (patient_id, allergy),
+    PRIMARY KEY (exam_id, allergy),
     
-    CONSTRAINT fk_patient_allergy_patient_id 	FOREIGN KEY (patient_id)
-		REFERENCES patient(id) 						
+    CONSTRAINT fk_patient_allergy_exam_id FOREIGN KEY (exam_id)
+		REFERENCES examination(id) 						
         ON DELETE CASCADE
 );
 
