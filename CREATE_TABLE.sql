@@ -6,7 +6,7 @@ SET FOREIGN_KEY_CHECKS=0;
 CREATE TABLE IF NOT EXISTS clinic
 (
 	id					INT 				AUTO_INCREMENT,
-    _name				VARCHAR(50)			UNIQUE,
+    _name				VARCHAR(50)			NOT NULL UNIQUE,
     email    			VARCHAR(100)		NOT NULL,
     _desc				VARCHAR(255),
     PRIMARY KEY (id)
@@ -130,7 +130,6 @@ CREATE TABLE IF NOT EXISTS examination
     patient_id 			INT,
     app_id 				INT,
     bill_id				INT,
-    service_id			INT,
     
     PRIMARY KEY (id),
     
@@ -145,9 +144,6 @@ CREATE TABLE IF NOT EXISTS examination
         ON DELETE SET NULL,
     CONSTRAINT fk_examination_bill_id 		FOREIGN KEY (bill_id)
 		REFERENCES bill(id) 					
-        ON DELETE SET NULL,
-    CONSTRAINT fk_examination_service_id 	FOREIGN KEY (service_id)
-		REFERENCES service(id) 					
         ON DELETE SET NULL
 );
 
@@ -155,10 +151,14 @@ CREATE TABLE IF NOT EXISTS bill
 (
 	id 					INT					AUTO_INCREMENT,
     total_cost			INT					NOT NULL DEFAULT 0,
-    _status 			BOOL				NOT NULL DEFAULT FALSE, /* 0: Not pay yet, 1: Paid */
+    ispaid				BOOL				NOT NULL DEFAULT FALSE, /* 0: Not pay yet, 1: Paid */
     _timestamp 			TIMESTAMP 			NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clinic_id			INT,
+
+    PRIMARY KEY (id),
     
-    PRIMARY KEY (id)
+    CONSTRAINT fk_bill_clinic_id 		FOREIGN KEY(clinic_id)
+    REFERENCES clinic.id
 );
 
 CREATE TABLE IF NOT EXISTS medicine
@@ -179,6 +179,7 @@ CREATE TABLE IF NOT EXISTS service
     _name 				VARCHAR(50)			NOT NULL,
     cost 				INT					NOT NULL,
     _desc 				VARCHAR(50),
+    _status				VARCHAR(50)			NOT NULL DEFAULT "ACTIVE",
     
     CONSTRAINT service_check_1
 		CHECK (cost > 0)
@@ -253,6 +254,21 @@ CREATE TABLE IF NOT EXISTS medicine_in_clinic
         ON DELETE CASCADE,
     
     CHECK (quantity > 0)
+);
+
+CREATE TABLE IF NOT EXISTS services_for_exam(
+	service_id INT,
+    exam_id    INT,
+    
+    PRIMARY KEY (service_id, exam_id),
+    
+    CONSTRAINT fk_service_for_exam_service_id	FOREIGN KEY (service_id)
+		REFERENCES service(id)
+        ON DELETE CASCADE,
+        
+	CONSTRAINT fk_service_for_exam_exam_id	FOREIGN KEY (exam_id)
+		REFERENCES examination(id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS prescription

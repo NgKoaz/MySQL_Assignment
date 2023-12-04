@@ -14,4 +14,5 @@ DROP PROCEDURE IF EXISTS deleteUserByUsername;
 DROP PROCEDURE IF EXISTS deleteUserById;
 
 
--- DROP TRIGGER IF EXISTS insertClinicTrigger;
+DROP TRIGGER IF EXISTS preventClinicDeletion;
+DROP TRIGGER IF EXISTS totalCostExamination;

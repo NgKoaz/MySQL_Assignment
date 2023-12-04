@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS examination;
 DROP TABLE IF EXISTS bill;
 DROP TABLE IF EXISTS medicine;
 DROP TABLE IF EXISTS service;
+DROP TABLE IF EXISTS services_for_exam;
 DROP TABLE IF EXISTS work_at;
 DROP TABLE IF EXISTS work_with;
 DROP TABLE IF EXISTS patient_appointment;
