@@ -20,4 +20,10 @@ END
 //
 
 
+
+CREATE PROCEDURE doctorExamineMost(
+)
+BEGIN
+
+END //
 DELIMITER ;

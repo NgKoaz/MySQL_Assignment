@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS bill
     PRIMARY KEY (id),
     
     CONSTRAINT fk_bill_clinic_id 		FOREIGN KEY(clinic_id)
-    REFERENCES clinic.id
+    REFERENCES clinic(id)
 );
 
 CREATE TABLE IF NOT EXISTS medicine
